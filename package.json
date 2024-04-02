@@ -55,7 +55,7 @@
     "@babel/preset-typescript": "^7.13.0",
     "@mui/icons-material": "^5.15.14",
     "@mui/material": "^5.15.14",
-    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "babel-loader": "^8.1.0",
     "babel-plugin-optimize-clsx": "^2.6.0",
