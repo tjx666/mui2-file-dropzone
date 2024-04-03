@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-node@v4.0.2
         with:
           node-version: 20
+          registry_url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: yarn 
@@ -28,6 +29,6 @@ jobs:
         run: yarn prepublish
 
       - name: Publish
-        run: yarn publish
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
