@@ -1,12 +1,12 @@
 {
-  "name": "mui2-file-dropzone",
-  "version": "5.0.0",
+  "name": "@yutengjing/material-ui-dropzone",
+  "version": "5.1.0",
   "description": "A Material-UI file-upload dropzone. Written in TypeScript.",
   "license": "MIT",
-  "author": "Yuval",
+  "author": "yutengjing",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ludea/mui2-file-dropzone.git"
+    "url": "https://github.com/tjx666/mui-file-dropzone.git"
   },
   "keywords": [
     "react",
@@ -26,6 +26,7 @@
     "dist",
     "src"
   ],
+  "packageManager": "yarn@1.22.22",
   "scripts": {
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
@@ -38,42 +39,42 @@
     "prepublish": "npx tsc"
   },
   "dependencies": {
-    "@babel/runtime": "^7.4.4",
-    "clsx": "^2.1.0",
-    "react-dropzone": "^10.2.1",
-    "tslib": "^2.6.2"
+    "clsx": "^2.1.1",
+    "react-dropzone": "^14.2.3"
   },
   "peerDependencies": {
+    "@babel/runtime": "^7.0.0",
     "@mui/icons-material": "^5.0.0",
     "@mui/material": "^5.0.0",
     "prop-types": "^15.7.2",
     "react": ">= 18.0",
-    "react-dom": ">= 18.0"
+    "react-dom": ">= 18.0",
+    "tslib": "^2.6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.3",
-    "@babel/preset-env": "^7.24.3",
-    "@babel/preset-typescript": "^7.13.0",
-    "@mui/icons-material": "^5.15.14",
-    "@mui/material": "^5.15.14",
-    "@typescript-eslint/eslint-plugin": "^7.5.0",
-    "@typescript-eslint/parser": "^7.5.0",
+    "@babel/core": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
+    "@babel/preset-typescript": "^7.24.7",
+    "@mui/icons-material": "^5.15.20",
+    "@mui/material": "^5.15.20",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.14.1",
     "babel-loader": "^9.1.3",
-    "babel-plugin-optimize-clsx": "^2.6.0",
+    "babel-plugin-optimize-clsx": "^2.6.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-babel": "^5.3.1",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-prettier": "^5.1.3",
-    "eslint-plugin-react": "^7.34.1",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-simple-import-sort": "^12.0.0",
+    "eslint-plugin-react": "^7.34.3",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-simple-import-sort": "^12.1.0",
     "gh-pages": "^6.1.1",
-    "prettier": "^3.2.5",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "typescript": "^5.4.3",
-    "webpack": "^5.91.0"
+    "prettier": "^3.3.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.5.2",
+    "webpack": "^5.92.1"
   }
 }

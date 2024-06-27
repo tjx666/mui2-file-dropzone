@@ -18,7 +18,13 @@ import React, {
   HTMLProps,
   PureComponent,
 } from "react";
-import Dropzone, { DropEvent, DropzoneProps } from "react-dropzone";
+import Dropzone, {
+  Accept,
+  DropEvent,
+  DropzoneProps,
+  ErrorCode,
+  FileRejection,
+} from "react-dropzone";
 
 import { convertBytesToMbsOrKbs, isImage, readFile } from "../helpers";
 import { AlertType, FileObject } from "../types";
@@ -33,7 +39,7 @@ const defaultSnackbarAnchorOrigin: SnackbarOrigin = {
 
 const defaultGetPreviewIcon: PreviewListProps["getPreviewIcon"] = (
   fileObject,
-  classes
+  classes,
 ) => {
   const { data, file } = fileObject || {};
   if (isImage(file)) {
@@ -87,8 +93,9 @@ export type DropzoneAreaBaseProps = {
   /** A list of file types to accept.
    *
    * @see See [here](https://react-dropzone.js.org/#section-accepting-specific-file-types) for more details.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker#accept
    */
-  acceptedFiles?: string[];
+  accept?: Accept;
   /** Maximum number of files that can be loaded into the dropzone. */
   filesLimit?: number;
   /** Currently loaded files. */
@@ -200,10 +207,10 @@ export type DropzoneAreaBaseProps = {
   /**
    * Fired when a file is rejected because of wrong file type, size or goes beyond the filesLimit.
    *
-   * @param {File[]} rejectedFiles All the rejected files.
+   * @param {File[]} fileRejections All the rejected files.
    * @param {Event} event The react-dropzone drop event.
    */
-  onDropRejected?: (rejectedFiles: File[], event: DropEvent) => void;
+  onDropRejected?: (fileRejections: FileRejection[], event: DropEvent) => void;
   /**
    * Fired when an alert is triggered.
    *
@@ -238,16 +245,16 @@ export type DropzoneAreaBaseProps = {
   /**
    * Get alert message to display when a file is rejected onDrop.
    *
-   * *Default*: "File ${rejectedFile.name} was rejected."
+   * *Default*: "File ${fileRejection.name} was rejected."
    *
-   * @param {Object} rejectedFile The file that got rejected
-   * @param {string[]} acceptedFiles The `acceptedFiles` prop currently set for the component
+   * @param {Object} fileRejection The file that got rejected
+   * @param {Accept} accept The `accept` prop currently set for the component
    * @param {number} maxFileSize The `maxFileSize` prop currently set for the component
    */
   getDropRejectMessage?: (
-    rejectedFile: File,
-    acceptedFiles: string[],
-    maxFileSize: number
+    fileRejection: FileRejection,
+    accept: Accept,
+    maxFileSize: number,
   ) => string;
   /**
    * A function which determines which icon to display for a file preview.
@@ -275,7 +282,7 @@ class DropzoneAreaBase extends PureComponent<
 > {
   static propTypes = {
     classes: PropTypes.object,
-    acceptedFiles: PropTypes.arrayOf(PropTypes.string),
+    accept: PropTypes.object,
     filesLimit: PropTypes.number,
     Icon: PropTypes.elementType,
     fileObjects: PropTypes.arrayOf(FileObjectShape),
@@ -296,7 +303,7 @@ class DropzoneAreaBase extends PureComponent<
     showAlerts: PropTypes.oneOfType([
       PropTypes.bool,
       PropTypes.arrayOf(
-        PropTypes.oneOf(["error", "success", "info", "warning"])
+        PropTypes.oneOf(["error", "success", "info", "warning"]),
       ),
     ]),
     alertSnackbarProps: PropTypes.object,
@@ -315,7 +322,7 @@ class DropzoneAreaBase extends PureComponent<
   };
 
   static defaultProps = {
-    acceptedFiles: [],
+    accept: [],
     filesLimit: 3,
     fileObjects: [] as FileObject[],
     maxFileSize: 3000000,
@@ -351,12 +358,24 @@ class DropzoneAreaBase extends PureComponent<
       `File ${fileName} removed.`) as NonNullable<
       DropzoneAreaBaseProps["getFileRemovedMessage"]
     >,
-    getDropRejectMessage: ((rejectedFile, acceptedFiles, maxFileSize) => {
-      let message = `File ${rejectedFile.name} was rejected. `;
-      if (!acceptedFiles.includes(rejectedFile.type)) {
-        message += "File type not supported. ";
+    getDropRejectMessage: ((fileRejection, accept, maxFileSize) => {
+      let message = `File ${fileRejection.file.name} was rejected. `;
+      if (
+        fileRejection.errors.some(
+          (error) => error.code === ErrorCode.FileInvalidType,
+        )
+      ) {
+        message +=
+          "File type not supported. Only support: " +
+          JSON.stringify(accept) +
+          ". ";
       }
-      if (rejectedFile.size > maxFileSize) {
+
+      if (
+        fileRejection.errors.some(
+          (error) => error.code === ErrorCode.FileTooLarge,
+        )
+      ) {
         message +=
           "File is too big. Size limit is " +
           convertBytesToMbsOrKbs(maxFileSize) +
@@ -380,10 +399,7 @@ class DropzoneAreaBase extends PureComponent<
     }
   }
 
-  handleDropAccepted: DropzoneProps["onDropAccepted"] = async (
-    acceptedFiles,
-    evt
-  ) => {
+  handleDropAccepted: DropzoneProps["onDropAccepted"] = async (accept, evt) => {
     const {
       fileObjects,
       filesLimit = DropzoneAreaBase.defaultProps.filesLimit,
@@ -394,35 +410,32 @@ class DropzoneAreaBase extends PureComponent<
       onDrop,
     } = this.props;
 
-    if (
-      filesLimit > 1 &&
-      fileObjects.length + acceptedFiles.length > filesLimit
-    ) {
+    if (filesLimit > 1 && fileObjects.length + accept.length > filesLimit) {
       this.setState(
         {
           openSnackBar: true,
           snackbarMessage: getFileLimitExceedMessage(filesLimit),
           snackbarVariant: "error",
         },
-        this.notifyAlert
+        this.notifyAlert,
       );
       return;
     }
 
     // Notify Drop event
     if (onDrop) {
-      onDrop(acceptedFiles, evt);
+      onDrop(accept, evt);
     }
 
     // Retrieve fileObjects data
     const fileObjs = await Promise.all(
-      acceptedFiles.map(async (file) => {
+      accept.map(async (file) => {
         const data = await readFile(file);
         return {
           file,
           data,
         };
-      })
+      }),
     );
 
     // Notify added files
@@ -433,7 +446,7 @@ class DropzoneAreaBase extends PureComponent<
     // Display message
     const message = fileObjs.reduce(
       (msg, fileObj) => msg + getFileAddedMessage(fileObj.file.name),
-      ""
+      "",
     );
     this.setState(
       {
@@ -441,16 +454,16 @@ class DropzoneAreaBase extends PureComponent<
         snackbarMessage: message,
         snackbarVariant: "success",
       },
-      this.notifyAlert
+      this.notifyAlert,
     );
   };
 
   handleDropRejected: DropzoneProps["onDropRejected"] = (
-    rejectedFiles,
-    evt
+    fileRejections,
+    evt,
   ) => {
     const {
-      acceptedFiles,
+      accept,
       filesLimit = DropzoneAreaBase.defaultProps.filesLimit,
       fileObjects,
       getDropRejectMessage = DropzoneAreaBase.defaultProps.getDropRejectMessage,
@@ -461,20 +474,20 @@ class DropzoneAreaBase extends PureComponent<
     } = this.props;
 
     let message = "";
-    if (fileObjects.length + rejectedFiles.length > filesLimit) {
+    if (fileObjects.length + fileRejections.length > filesLimit) {
       message = getFileLimitExceedMessage(filesLimit);
     } else {
-      rejectedFiles.forEach((rejectedFile) => {
+      fileRejections.forEach((fileRejection) => {
         message = getDropRejectMessage(
-          rejectedFile,
-          acceptedFiles || [],
-          maxFileSize
+          fileRejection,
+          accept || {},
+          maxFileSize,
         );
       });
     }
 
     if (onDropRejected) {
-      onDropRejected(rejectedFiles, evt);
+      onDropRejected(fileRejections, evt);
     }
 
     this.setState(
@@ -483,7 +496,7 @@ class DropzoneAreaBase extends PureComponent<
         snackbarMessage: message,
         snackbarVariant: "error",
       },
-      this.notifyAlert
+      this.notifyAlert,
     );
   };
 
@@ -511,7 +524,7 @@ class DropzoneAreaBase extends PureComponent<
         snackbarMessage: getFileRemovedMessage(removedFileObj.file.name),
         snackbarVariant: "info",
       },
-      this.notifyAlert
+      this.notifyAlert,
     );
   };
 
@@ -569,7 +582,7 @@ class DropzoneAreaBase extends PureComponent<
 
   render() {
     const {
-      acceptedFiles,
+      accept,
       alertSnackbarProps,
       classes = {},
       disableRejectionFeedback,
@@ -596,7 +609,6 @@ class DropzoneAreaBase extends PureComponent<
     } = this.props;
     const { openSnackBar, snackbarMessage, snackbarVariant } = this.state;
 
-    const acceptFiles = acceptedFiles?.join(",");
     const isMultiple = filesLimit > 1;
     const previewsVisible = showPreviews && fileObjects.length > 0;
     const previewsInDropzoneVisible =
@@ -606,7 +618,7 @@ class DropzoneAreaBase extends PureComponent<
       <Fragment>
         <Dropzone
           {...dropzoneProps}
-          accept={acceptFiles}
+          accept={accept}
           onDropAccepted={this.handleDropAccepted}
           onDropRejected={this.handleDropRejected}
           maxSize={maxFileSize}
@@ -630,7 +642,7 @@ class DropzoneAreaBase extends PureComponent<
                     classes.root,
                     dropzoneClass,
                     isActive && classes.active,
-                    isInvalid && classes.invalid
+                    isInvalid && classes.invalid,
                   ),
                 })}
               >
