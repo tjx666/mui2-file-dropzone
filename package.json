@@ -4,9 +4,12 @@
   "description": "A Material-UI file-upload dropzone. Written in TypeScript.",
   "license": "MIT",
   "author": "yutengjing",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tjx666/mui-file-dropzone.git"
+    "url": "git+https://github.com/tjx666/mui-file-dropzone.git"
   },
   "keywords": [
     "react",
@@ -23,8 +26,7 @@
   "jsnext:main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "packageManager": "yarn@1.22.22",
   "scripts": {
