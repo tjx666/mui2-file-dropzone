@@ -1,11 +1,11 @@
 import PropTypes from "prop-types";
-import React, { PureComponent, SyntheticEvent } from "react";
+import type { SyntheticEvent } from "react";
+import React, { PureComponent } from "react";
 
 import { createFileFromUrl, readFile } from "../helpers";
-import { FileObject } from "../types";
-import DropzoneDialogBase, {
-  DropzoneDialogBaseProps,
-} from "./DropzoneDialogBase";
+import type { FileObject } from "../types";
+import type { DropzoneDialogBaseProps } from "./DropzoneDialogBase";
+import DropzoneDialogBase from "./DropzoneDialogBase";
 
 export type DropzoneDialogProps = Omit<
   DropzoneDialogBaseProps,
@@ -61,7 +61,7 @@ class DropzoneDialog extends PureComponent<
     clearOnUnmount: PropTypes.bool,
     filesLimit: PropTypes.number,
     initialFiles: PropTypes.arrayOf(
-      PropTypes.oneOfType([PropTypes.string, PropTypes.any])
+      PropTypes.oneOfType([PropTypes.string, PropTypes.any]),
     ),
     onSave: PropTypes.func,
   };
@@ -113,14 +113,14 @@ class DropzoneDialog extends PureComponent<
 
           const fileObj: FileObject = { file, data };
           return fileObj;
-        })
+        }),
       );
 
       this.setState(
         (state) => ({
           fileObjects: [...state.fileObjects, ...fileObjs],
         }),
-        this.notifyFileChange
+        this.notifyFileChange,
       );
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -149,7 +149,7 @@ class DropzoneDialog extends PureComponent<
 
   deleteFile: DropzoneDialogBaseProps["onDelete"] = (
     removedFileObj,
-    removedFileObjIdx
+    removedFileObjIdx,
   ) => {
     event?.stopPropagation();
 
@@ -189,7 +189,7 @@ class DropzoneDialog extends PureComponent<
     if (onSave) {
       onSave(
         fileObjects.map((fileObject) => fileObject.file),
-        evt
+        evt,
       );
     }
 

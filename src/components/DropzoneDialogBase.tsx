@@ -1,13 +1,16 @@
-import { Breakpoint } from "@mui/material";
-import Button, { ButtonProps } from "@mui/material/Button";
-import Dialog, { DialogProps } from "@mui/material/Dialog";
+import type { Breakpoint } from "@mui/material";
+import type { ButtonProps } from "@mui/material/Button";
+import Button from "@mui/material/Button";
+import type { DialogProps } from "@mui/material/Dialog";
+import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import PropTypes from "prop-types";
 import React, { PureComponent } from "react";
 
-import DropzoneAreaBase, { DropzoneAreaBaseProps } from "./DropzoneAreaBase";
+import type { DropzoneAreaBaseProps } from "./DropzoneAreaBase";
+import DropzoneAreaBase from "./DropzoneAreaBase";
 
 export type DropzoneDialogBaseProps = DropzoneAreaBaseProps & {
   /** Cancel button text in dialog. */
@@ -86,7 +89,7 @@ function splitDropzoneDialogProps(allProps: DropzoneDialogBaseProps) {
 
   const splitProps = [dropzoneDialogProps, dropzoneAreaProps] as [
     typeof dropzoneDialogProps,
-    typeof dropzoneAreaProps
+    typeof dropzoneAreaProps,
   ];
   return splitProps;
 }
@@ -134,7 +137,7 @@ class DropzoneDialogBase extends PureComponent<DropzoneDialogBaseProps> {
 
   render() {
     const [dropzoneDialogProps, dropzoneAreaProps] = splitDropzoneDialogProps(
-      this.props
+      this.props,
     );
     const {
       cancelButtonText,
